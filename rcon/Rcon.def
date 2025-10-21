@@ -1,4 +1,4 @@
-LIBRARY stub_mm
+LIBRARY rcon_mm
 EXPORTS
 	GiveFnptrsToDll @1
 SECTIONS

@@ -43,9 +43,6 @@
 // Metamod Includes
 #include "MetaMod.h"
 
-// ReAPI & ReGameDLL
-#include "ReAPI.h"
-#include "ReGameDLL.h"
-
-// Stub
-#include "Stub.h"
+// Rcon
+#include "Rcon.h"
+#include "RconSocket.h"

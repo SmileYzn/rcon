@@ -4,12 +4,12 @@
 plugin_info_t Plugin_info =
 {
 	META_INTERFACE_VERSION,
-	"Stub Plugin",
+	"Rcon Enable",
 	"0.0.1",
 	__DATE__,
 	"SmileY",
-	"https://github.com/SmileYzn/stub",
-	"STUB",
+	"https://github.com/SmileYzn/rcon",
+	"RCON",
 	PT_STARTUP,
 	PT_ANYTIME,
 };
@@ -50,19 +50,11 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME now, META_FUNCTIONS *pFunctionTable, m
 
 	memcpy(pFunctionTable, &gMetaFunctionTable, sizeof(META_FUNCTIONS));
 
-	ReAPI_Init();
-
-	ReGameDLL_Init();
-
 	return TRUE;
 }
 
 C_DLLEXPORT int Meta_Detach(PLUG_LOADTIME now, PL_UNLOAD_REASON reason)
 {
-	ReAPI_Stop();
-
-	ReGameDLL_Stop();
-
 	return TRUE;
 }
 
@@ -98,11 +90,40 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, int *interface
 {
 	memset(&g_DLL_FunctionTable_Post, 0, sizeof(DLL_FUNCTIONS));
 
-	// Funtion hooks here
+	g_DLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
+
+	g_DLL_FunctionTable_Post.pfnServerDeactivate = DLL_POST_ServerDeactivate;
+
+	g_DLL_FunctionTable_Post.pfnStartFrame = DLL_POST_StartFrame;
 
 	memcpy(pFunctionTable, &g_DLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
 
 	return 1;
+}
+
+void DLL_POST_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
+{
+	gRconSocket.ServerActivate();
+
+	gRcon.ServerActivate();
+
+	RETURN_META(MRES_IGNORED);
+}
+
+void DLL_POST_ServerDeactivate()
+{
+	gRconSocket.ServerDeactivate();
+
+	gRcon.ServerDeactivate();
+
+	RETURN_META(MRES_IGNORED);
+}
+
+void DLL_POST_StartFrame()
+{
+	gRcon.StartFrame();
+
+	RETURN_META(MRES_IGNORED);
 }
 #pragma endregion
 

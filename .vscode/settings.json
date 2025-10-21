@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "string_view": "cpp",
+        "new": "cpp",
+        "format": "cpp",
+        "queue": "cpp",
+        "thread": "cpp",
+        "vector": "cpp"
+    }
+}

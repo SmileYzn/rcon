@@ -24,7 +24,10 @@ enum RCON_SOCKET_ERROR
 class CRconSocket
 {
 public:
+    // On Server Activate
     void ServerActivate();
+
+    // On Server Deactivate
     void ServerDeactivate();
 
     // native socket_set_non_blocking(_socket);

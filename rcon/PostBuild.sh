@@ -25,8 +25,8 @@ dllPath="$hldsPath/cstrike/addons/${pluginName,,}/dlls";
 buildFile=$(realpath "./Release/${pluginName,,}_mm.so")
 
 # Kill HLDS Process
-pkill -2 -q -f hlds_linux
-pkill -2 -q -f hlds_run
+#pkill -2 -q -f hlds_linux
+#pkill -2 -q -f hlds_run
 
 # Sleep
 sleep 2

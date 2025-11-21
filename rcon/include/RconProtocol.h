@@ -17,7 +17,13 @@ public:
 
         Q_memset(&this->m_sSockAddr, 0, sizeof(this->m_sSockAddr));
 
-        this->m_ResultFunction = nullptr;
+        this->m_Password.clear();
+        
+        this->m_Command.clear();
+
+        this->m_Challenge.clear();
+
+        this->m_Result.clear();
     }
 
     virtual ~RconProtocol()
@@ -32,7 +38,13 @@ public:
 
             Q_memset(&this->m_sSockAddr, 0, sizeof(this->m_sSockAddr));
 
-            this->m_ResultFunction = nullptr;
+            this->m_Password.clear();
+
+            this->m_Command.clear();
+
+            this->m_Challenge.clear();
+
+            this->m_Result.clear();
         }
     }
 
@@ -63,15 +75,13 @@ public:
         return false;
     }
 
-    bool Send(std::string Command, void *ResultFunction)
+    bool Send(std::string Command)
     {
         if (this->m_iSocket >= 0)
         {
             if (!Command.empty())
             {
                 this->m_Command = Command;
-
-                this->m_ResultFunction = ResultFunction;
 
                 if (this->m_iState == RCON_STATE_NONE)
                 {
@@ -126,6 +136,7 @@ public:
                         {
                             // Nothing to read, keep going
                         }
+
                         return;
                     }
 
@@ -141,18 +152,11 @@ public:
 
                         this->m_Challenge[this->m_Challenge.size() - 1] = '\0'; 
 
-                        this->Send(this->m_Command, this->m_ResultFunction);
+                        this->Send(this->m_Command);
                     }
                     else if (this->m_iState == RCON_STATE_COMMAND)
                     {
-                        if (this->m_ResultFunction)
-                        {
-                            ((void(*)(const char*))this->m_ResultFunction)(szBuffer);
-                        }
-                        else
-                        {
-                            LOG_CONSOLE(PLID, "%s", szBuffer);
-                        }
+                        this->m_Result = szBuffer;
 
                         this->m_iState = RCON_STATE_NONE;
                     }
@@ -161,15 +165,18 @@ public:
         }
     }
 
+    std::string GetResult()
+    {
+        return m_Result;
+    }
+
 private:
     int m_iSocket = -1;
     int m_iState  = RCON_STATE_NONE;
     sockaddr_in m_sSockAddr;
-
     std::string m_Password;
     std::string m_Command;
     std::string m_Challenge;
-
-   void *m_ResultFunction;
+    std::string m_Result;
 };
 

@@ -24,6 +24,15 @@ void CRcon::StartFrame()
     if (this->m_Rcon)
     {
         this->m_Rcon->Frame();
+
+        std::string Result = this->m_Rcon->GetResult();
+
+        if (!Result.empty())
+        {
+            LOG_CONSOLE(PLID, "%s", Result.c_str());
+
+            delete this->m_Rcon;
+        }
     }
 }
 
@@ -72,18 +81,7 @@ void CRcon::SendCommand(const char* pszHost, int iPort, const char* pszPassword,
         this->m_Rcon = new RconProtocol(pszPassword);
 
         this->m_Rcon->Connect(pszHost, iPort);
-    }
 
-    this->m_Rcon->Send(pszComand, (void*)this->CommandResult);
-}
-
-void CRcon::CommandResult(const char* pszResult)
-{
-    if (pszResult)
-    {
-        if (pszResult[0u] != '\0')
-        {
-            LOG_CONSOLE(PLID, "%s", pszResult);
-        }
+        this->m_Rcon->Send(pszComand);
     }
 }

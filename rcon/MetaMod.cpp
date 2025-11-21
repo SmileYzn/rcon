@@ -103,7 +103,7 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, int *interface
 
 void DLL_POST_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
-	gRconSocket.ServerActivate();
+	gRconCvar.ServerActivate();
 
 	gRcon.ServerActivate();
 
@@ -112,8 +112,6 @@ void DLL_POST_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 void DLL_POST_ServerDeactivate()
 {
-	gRconSocket.ServerDeactivate();
-
 	gRcon.ServerDeactivate();
 
 	RETURN_META(MRES_IGNORED);

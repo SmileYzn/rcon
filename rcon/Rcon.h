@@ -1,26 +1,16 @@
 #pragma once
 
-#define STATE_NONE 0
-#define STATE_CHALLENGE 1
-#define STATE_COMAND 2
-#define STATE_CLOSE 3
-
 class CRcon
 {
 public:
     void ServerActivate();
     void ServerDeactivate();
     void StartFrame();
-
-    void SendCommand(const char* pszCommand);
-
-    int  m_Socket;
-    int  m_Error;
-    int  m_State;
-
-    char m_Send[512];
-    char m_Data[256];
-    char m_Numb[64];
+    static void SendRcon();
+    void SendCommand(const char* pszHost, int iPort, const char* pszPassword, const char *pszComand);
+    static void CommandResult(const char* pszResult);
+private:
+   RconProtocol *m_Rcon = nullptr;
 };
 
 extern CRcon gRcon;

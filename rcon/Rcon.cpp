@@ -4,95 +4,86 @@ CRcon gRcon;
 
 void CRcon::ServerActivate()
 {
-    this->m_Socket = 0;
-    this->m_Error = 0;
-    this->m_State = STATE_NONE;
+    this->m_Rcon = nullptr;
 
-    Q_memset(this->m_Send, 0, sizeof(this->m_Send));
-    Q_memset(this->m_Data, 0, sizeof(this->m_Data));
-    Q_memset(this->m_Numb, 0, sizeof(this->m_Numb));
-
-    this->SendCommand("status");
+    g_engfuncs.pfnAddServerCommand("rr_send", this->SendRcon);
 }
 
 void CRcon::ServerDeactivate()
 {
-    if (this->m_Socket)
+    if (this->m_Rcon)
     {
-        gRconSocket.Close(this->m_Socket);
+        delete this->m_Rcon;
+
+        this->m_Rcon = nullptr;
     }
-    
-    this->m_Socket = 0;
-    this->m_Error = 0;
 }
 
 void CRcon::StartFrame()
 {
-    switch (this->m_State)
+    if (this->m_Rcon)
     {
-        case STATE_CHALLENGE:
-        {
-            if(gRconSocket.IsReadable(this->m_Socket, 100000)) 
-            {
-                gRconSocket.Recv(this->m_Socket, this->m_Numb, sizeof(this->m_Numb));
-
-                char *p = strstr(this->m_Numb, "challenge ");
-
-                int len = strlen("challenge ");
-
-                Q_memmove(p, p + len, strlen(p + len) + 1);
-
-                this->m_State = STATE_COMAND;
-            }
-            break;
-        }
-        case STATE_COMAND:
-        {
-            snprintf(this->m_Send, sizeof(this->m_Send), "%s \"%s\" %s", this->m_Numb, "2133", this->m_Data);
-            //LOG_CONSOLE(PLID, "TESTE %s", this->m_Send);
-            //this->m_State = STATE_CLOSE;
-            gRconSocket.Send2(this->m_Socket, this->m_Send, strlen(this->m_Send));
-            break;
-        }
-        case STATE_CLOSE:
-        {
-            if (this->m_Socket)
-            {
-                gRconSocket.Close(this->m_Socket);
-            }
-            
-            this->m_Socket = 0;
-            this->m_Error = 0;
-            break;
-        }
+        this->m_Rcon->Frame();
     }
 }
 
-void CRcon::SendCommand(const char* pszCommand)
+void CRcon::SendRcon()
 {
-    if (pszCommand)
+    if (g_engfuncs.pfnCmd_Argc() >= 2)
     {
-        if (pszCommand[0u] != '\0')
+        auto pCmdArgs = g_engfuncs.pfnCmd_Args();
+
+        if (pCmdArgs)
         {
-            if (this->m_State == STATE_NONE)
+            if (pCmdArgs[0u] != '\0')
             {
-                Q_strncpy(this->m_Data, pszCommand, sizeof(this->m_Data));
-
-                this->m_Socket = gRconSocket.Open("192.168.100.100", "27021", SOCKET_UDP, &this->m_Error, 0);
-
-                if (this->m_Error != 0)
+                if (gRconCvar.m_Host->string[0u] == '\0')
                 {
-                    gRconSocket.Close(this->m_Socket);
-                    gpMetaUtilFuncs->pfnLogConsole(PLID, "[%s] Error %d creating the socket.", Plugin_info.logtag, this->m_Error);
+                    LOG_CONSOLE(PLID, "[%s] Fill the '%s' console variable.", Plugin_info.logtag, gRconCvar.m_Host->name);
                     return;
                 }
 
-                this->m_State = STATE_CHALLENGE;
+                if (gRconCvar.m_Port->string[0u] == '\0')
+                {
+                    LOG_CONSOLE(PLID, "[%s] Fill the '%s' console variable.", Plugin_info.logtag, gRconCvar.m_Port->name);
+                    return;
+                }
 
-                snprintf(this->m_Send, sizeof(this->m_Send), "%c%c%c%cchallenge rcon", 255, 255, 255, 255);
+                if (gRconCvar.m_Pass->string[0u] == '\0')
+                {
+                    LOG_CONSOLE(PLID, "[%s] Fill the '%s' console variable.", Plugin_info.logtag, gRconCvar.m_Pass->name);
+                    return;
+                }
 
-                gRconSocket.Send2(this->m_Socket, this->m_Send, strlen(this->m_Send));
+                gRcon.SendCommand(gRconCvar.m_Host->string, gRconCvar.m_Port->value, gRconCvar.m_Pass->string, pCmdArgs);
+
+                return;
             }
+        }
+    }
+    
+    LOG_CONSOLE(PLID, "[%s] Usage: ^3%s^1 <command>", Plugin_info.logtag, g_engfuncs.pfnCmd_Argv(0));
+}
+
+void CRcon::SendCommand(const char* pszHost, int iPort, const char* pszPassword, const char *pszComand)
+{
+    if (!this->m_Rcon)
+    {
+        this->m_Rcon = new RconProtocol(pszPassword);
+
+        this->m_Rcon->Connect(pszHost, iPort);
+    }
+
+    this->m_Rcon->Send(pszComand, (void*)this->CommandResult);
+}
+
+void CRcon::CommandResult(const char* pszResult)
+{
+    if (pszResult)
+    {
+        if (pszResult[0u] != '\0')
+        {
+            LOG_CONSOLE(PLID, "%s", pszResult);
         }
     }
 }

@@ -43,6 +43,9 @@
 // Metamod Includes
 #include "MetaMod.h"
 
+// Rcon Protocol Class
+#include "include/RconProtocol.h"
+
 // Rcon
 #include "Rcon.h"
-#include "RconSocket.h"
+#include "RconCvar.h"

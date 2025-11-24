@@ -16,6 +16,9 @@
 #ifdef _WIN32
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4996)
+
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 #endif
 
 // System

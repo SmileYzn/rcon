@@ -4,11 +4,11 @@ CRconCvar gRconCvar;
 
 void CRconCvar::ServerActivate()
 {
-    this->m_Host = this->Register("rr_address", "192.168.100.100");
+    this->m_Host = this->Register("rr_address", "");
 
-    this->m_Port = this->Register("rr_port", "27021");
+    this->m_Port = this->Register("rr_port", "");
 
-    this->m_Pass = this->Register("rr_password", "2133");
+    this->m_Pass = this->Register("rr_password", "");
 }
 
 cvar_t *CRconCvar::Register(const char *pszName, const char *pszValue)

@@ -16,14 +16,22 @@ public:
         this->m_Password = Password;
 
         Q_memset(&this->m_sSockAddr, 0, sizeof(this->m_sSockAddr));
-
-        this->m_Password.clear();
         
         this->m_Command.clear();
 
         this->m_Challenge.clear();
 
-        this->m_Result.clear();
+#ifdef _WIN32
+        WSADATA WSAData;
+        int ErrorCode = WSAStartup(MAKEWORD(2, 2), &WSAData);
+        if (ErrorCode != NO_ERROR)
+        {
+            LOG_CONSOLE(PLID, "[%s] WSAStartup failed with error: %ld", Plugin_info.logtag, ErrorCode);
+            return;
+        }
+
+        this->m_WinSock = 1;
+#endif
     }
 
     virtual ~RconProtocol()
@@ -43,9 +51,16 @@ public:
             this->m_Command.clear();
 
             this->m_Challenge.clear();
-
-            this->m_Result.clear();
         }
+
+#ifdef _WIN32
+        if (this->m_WinSock)
+        {
+            WSACleanup();
+
+            this->m_WinSock = 0;
+        }
+#endif
     }
 
     bool Connect(const char* pszHost, int iPort)
@@ -58,11 +73,15 @@ public:
 
                 if (this->m_iSocket >= 0)
                 {
+#ifdef _WIN32
+                    unsigned long Mode = 1; // 1 Non-blocking
+                    ioctlsocket(this->m_iSocket, FIONBIO, &Mode);
+#else
                     int Flags = fcntl(this->m_iSocket, F_GETFL, 0);
-
                     fcntl(this->m_iSocket, F_SETFL, Flags | O_NONBLOCK);
-
+#endif
                     this->m_sSockAddr.sin_family = AF_INET;
+
                     this->m_sSockAddr.sin_port = htons(iPort);
 
                     inet_pton(AF_INET, pszHost, &this->m_sSockAddr.sin_addr);
@@ -112,13 +131,13 @@ public:
         return false;
     }
 
-    void Frame()
+    const char* GetResult()
     {
         if (this->m_iSocket >= 0)
         {
             if (this->m_iState != RCON_STATE_NONE)
             {
-                char szBuffer[8192] = {0};
+                static char szBuffer[4096];
 
                 Q_memset(szBuffer, '\0', sizeof(szBuffer));
 
@@ -137,7 +156,7 @@ public:
                             // Nothing to read, keep going
                         }
 
-                        return;
+                        return nullptr;
                     }
 
                     szBuffer[Received] = '\0';
@@ -156,27 +175,25 @@ public:
                     }
                     else if (this->m_iState == RCON_STATE_COMMAND)
                     {
-                        this->m_Result = szBuffer;
-
                         this->m_iState = RCON_STATE_NONE;
+
+                        return szBuffer;
                     }
                 }
             }
         }
-    }
 
-    std::string GetResult()
-    {
-        return m_Result;
+        return nullptr;
     }
-
 private:
+#ifdef _WIN32
+    int m_WinSock = 0;
+#endif
     int m_iSocket = -1;
     int m_iState  = RCON_STATE_NONE;
     sockaddr_in m_sSockAddr;
     std::string m_Password;
     std::string m_Command;
     std::string m_Challenge;
-    std::string m_Result;
 };
 

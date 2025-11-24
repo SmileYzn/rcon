@@ -4,34 +4,26 @@ CRcon gRcon;
 
 void CRcon::ServerActivate()
 {
-    this->m_Rcon = nullptr;
-
-    g_engfuncs.pfnAddServerCommand("rr_send", this->SendRcon);
-}
-
-void CRcon::ServerDeactivate()
-{
-    if (this->m_Rcon)
-    {
-        delete this->m_Rcon;
-
-        this->m_Rcon = nullptr;
-    }
+    char szCommand[] = "rr_send";
+    g_engfuncs.pfnAddServerCommand(szCommand, this->SendRcon);
 }
 
 void CRcon::StartFrame()
 {
     if (this->m_Rcon)
     {
-        this->m_Rcon->Frame();
+        auto lpResult = this->m_Rcon->GetResult();
 
-        std::string Result = this->m_Rcon->GetResult();
-
-        if (!Result.empty())
+        if (lpResult)
         {
-            LOG_CONSOLE(PLID, "%s", Result.c_str());
+            if (lpResult[0u] != '\0')
+            {
+                LOG_CONSOLE(PLID, "%s", lpResult);
 
-            delete this->m_Rcon;
+                delete this->m_Rcon;
+
+                this->m_Rcon = nullptr;
+            }
         }
     }
 }
@@ -71,7 +63,7 @@ void CRcon::SendRcon()
         }
     }
     
-    LOG_CONSOLE(PLID, "[%s] Usage: ^3%s^1 <command>", Plugin_info.logtag, g_engfuncs.pfnCmd_Argv(0));
+    LOG_CONSOLE(PLID, "[%s] Usage: '%s' <command>", Plugin_info.logtag, g_engfuncs.pfnCmd_Argv(0));
 }
 
 void CRcon::SendCommand(const char* pszHost, int iPort, const char* pszPassword, const char *pszComand)

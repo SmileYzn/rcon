@@ -37,7 +37,7 @@ cvar_t *CRconCvar::Register(const char *pszName, const char *pszValue)
                     }
                 }
                 
-                Data.flags = (FCVAR_SERVER | FCVAR_PROTECTED | FCVAR_SPONLY | FCVAR_UNLOGGED);
+                Data.flags = (FCVAR_PROTECTED | FCVAR_SPONLY | FCVAR_UNLOGGED);
 
                 g_engfuncs.pfnCVarRegister(&Data);
 

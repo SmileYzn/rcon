@@ -92,8 +92,6 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, int *interface
 
 	g_DLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
 
-	g_DLL_FunctionTable_Post.pfnServerDeactivate = DLL_POST_ServerDeactivate;
-
 	g_DLL_FunctionTable_Post.pfnStartFrame = DLL_POST_StartFrame;
 
 	memcpy(pFunctionTable, &g_DLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
@@ -106,13 +104,6 @@ void DLL_POST_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	gRconCvar.ServerActivate();
 
 	gRcon.ServerActivate();
-
-	RETURN_META(MRES_IGNORED);
-}
-
-void DLL_POST_ServerDeactivate()
-{
-	gRcon.ServerDeactivate();
 
 	RETURN_META(MRES_IGNORED);
 }

@@ -4,13 +4,12 @@ class CRcon
 {
 public:
     void ServerActivate();
-    void ServerDeactivate();
     void StartFrame();
     static void SendRcon();
     void SendCommand(const char* pszHost, int iPort, const char* pszPassword, const char *pszComand);
 
 private:
-   RconProtocol *m_Rcon = nullptr;
+    RconProtocol* m_Rcon;
 };
 
 extern CRcon gRcon;

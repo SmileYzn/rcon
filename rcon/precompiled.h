@@ -11,14 +11,10 @@
 #define _close close
 #define _acces access
 #define _vsnwprintf vswprintf
-#endif
-
-#ifdef _WIN32
+#else
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4996)
-
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
 #endif
 
 // System

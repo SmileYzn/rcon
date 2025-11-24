@@ -172,10 +172,19 @@ public:
                         this->m_Challenge[this->m_Challenge.size() - 1] = '\0'; 
 
                         this->Send(this->m_Command);
+
+                        return nullptr;
                     }
                     else if (this->m_iState == RCON_STATE_COMMAND)
                     {
                         this->m_iState = RCON_STATE_NONE;
+
+                        if (szBuffer[0u] != '\0')
+                        {
+                            size_t Length = strlen(szBuffer);
+
+                            Q_memmove(szBuffer, szBuffer + 5, Length - 5 + 1);
+                        }
 
                         return szBuffer;
                     }

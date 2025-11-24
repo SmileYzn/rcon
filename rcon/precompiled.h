@@ -15,6 +15,7 @@
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4996)
 #pragma comment(lib, "Ws2_32.lib")
+#include <Ws2tcpip.h>
 #endif
 
 // System
